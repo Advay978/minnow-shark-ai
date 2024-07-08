@@ -40,7 +40,6 @@ class Minnow {
   execute(index){
     if(index>79){
       run = false
-      calculatesurvivalrate()
     }
     if (index > 79 || this.dead){
       this.fitness = 20 - this.coords[1]
