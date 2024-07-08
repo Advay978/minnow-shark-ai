@@ -1,4 +1,5 @@
 run = true
+var speed = 1
 generation = 1
 function findcell(row, col){
   return document.getElementsByClassName("tr"+row.toString())[0].getElementsByTagName("td")[col-1]
@@ -40,6 +41,7 @@ class Minnow {
   execute(index){
     if(index>79){
       run = false
+      calculatesurvivalrate()
     }
     if (index > 79 || this.dead){
       this.fitness = 20 - this.coords[1]
@@ -48,7 +50,6 @@ class Minnow {
     }
     
     let direction = this.brain[index]
-    //console.log(index, this.brain)
     switch(direction){
       case 0:
         if(this.coords[0] + 1 < 21){
@@ -107,45 +108,47 @@ sharks = []
 for(let i=1; i<11; i++){
   sharks.push(new Shark(1, 2*i))
 }
-//console.log(minnow.brain)
 index = 0
+i = 0
 window.setInterval(function(){
   if(run){
-    if(index%4==0){
-      for (let i=0; i<10; i++){
-        sharks[i].move()
+    if(i%speed==0){
+      if(index%4==0){
+        for (let i=0; i<10; i++){
+          sharks[i].move()
+        }
+      } else if(index%3==0){
+        for (let i=0; i<5; i++){
+          sharks[i*2].move()
+        }
+      } else if (index%2==0){
+        for (let i=0; i<2; i++){
+          sharks[i*5 + 3].move()
+        }
+      } else {
+        sharks[7].move()
+        sharks[3].move()
       }
-    } else if(index%3==0){
-      for (let i=0; i<5; i++){
-        sharks[i*2].move()
+      z = 100
+  
+      for(let i=0;i<z;i++){
+        pop.population[i].execute(index)
       }
-    } else if (index%2==0){
-      for (let i=0; i<2; i++){
-        sharks[i*5 + 3].move()
+      index++
+      if(index>79){
+        calculatesurvivalrate()
       }
-    } else {
-      sharks[7].move()
-      sharks[3].move()
-    }
-    z = 100
-
-    for(let i=0;i<z;i++){
-      pop.population[i].execute(index)
-    }
-    index++
-    if(index>79){
-      calculatesurvivalrate()
-    }
-    //console.log(index,minnow.dead)
-    for(let i=0;i<z;i++){
-      minnow = pop.population[i]
-      for (let i=0; i<10; i++){
-
-        if(minnow.coords[0] == sharks[i].coords[0] && minnow.coords[1] == sharks[i].coords[1]){
-          minnow.dead=true
+      for(let i=0;i<z;i++){
+        minnow = pop.population[i]
+        for (let i=0; i<10; i++){
+  
+          if(minnow.coords[0] == sharks[i].coords[0] && minnow.coords[1] == sharks[i].coords[1]){
+            minnow.dead=true
+          }
         }
       }
     }
+    i++
   }
 }, 1)
 
@@ -163,7 +166,6 @@ function calculatesurvivalrate(){
     if (pop.population[i].fitness == 0){
       alive+=1
       fit += 1
-      console.log("hey", i)
     }
   }
   document.getElementById("report").innerText = alive+" alive, "+fit+" reached the end."
@@ -206,8 +208,6 @@ fitnesslist = []
     brainlist.push(newlist[i][1])
     fitnesslist.push(newlist[i][0])
   }
-  //console.log(fitnesslist)
-  //console.log(brainlist)
   newbrainlist = []
   for (let i=0; i<50; i++){
     newbrainlist.push(brainlist[i])
@@ -217,7 +217,6 @@ fitnesslist = []
     newbrainlist.push(mutate(mutatedbrainlist[i%50]))
   }
 
-  //console.log(newbrainlist)
   for(let i=0;i<100;i++){
     pop.population.push(new Minnow(newbrainlist[i]))
   }
@@ -228,7 +227,7 @@ fitnesslist = []
   generation++
   document.getElementById("generation").innerText = "Generation " + generation
   index = 0
-  //console.log(pop.population)
+  i = 0
   run = true
 }
 
@@ -240,4 +239,16 @@ function mutate(brain){
     }
   }
   return newbrain
+}
+
+function speedchange(){
+  
+  if(speed == 1){
+    document.getElementById("speed").innerText = "MAKE SIMULATION FASTER"
+    speed = 50
+  } else {
+    document.getElementById("speed").innerText = "MAKE SIMULATION SLOWER"
+    speed = 1
+  }
+  
 }
